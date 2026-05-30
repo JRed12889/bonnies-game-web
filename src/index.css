@@ -50,21 +50,24 @@ input[type="text"]::placeholder {
   color: #999;
 }
 
-/* Card row: horizontal scroll with no wrapping */
-.card-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  overflow-x: auto;
-  flex-wrap: nowrap;
-  padding-bottom: 8px;
-  -webkit-overflow-scrolling: touch;
+:root {
+  --card-gap: 8px;
 }
 
-/* Fixed-size card wrapper */
+/* Card row: show cards in a row (no horizontal scroll) */
+.card-row {
+  display: flex;
+  gap: var(--card-gap);
+  align-items: center;
+  overflow: visible;
+  justify-content: center;
+  padding-bottom: 4px;
+}
+
+/* Card wrapper: make five cards naturally fit across the container */
 .card-wrapper {
   flex: 0 0 auto;
-  width: 138px;
+  width: calc((100% - (4 * var(--card-gap))) / 5);
   height: 213px;
   box-sizing: border-box;
 }

@@ -77,9 +77,8 @@ function App() {
     <div>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <h1>Bonnie's Game</h1>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input value={stats.playerName} onChange={e => setStats({ ...stats, playerName: e.target.value })} />
-          <button onClick={() => setStats({ ...stats, mode: stats.mode === GameMode.Casual ? GameMode.Ranked : GameMode.Casual })}>{stats.mode === GameMode.Casual ? 'Casual' : 'Ranked'}</button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <input value={stats.playerName} onChange={e => setStats({ ...stats, playerName: e.target.value })} style={{ width: 120 }} />
         </div>
       </header>
 
@@ -89,8 +88,8 @@ function App() {
             <strong style={{ color: '#fff' }}>Deck</strong>
           </div>
         ) : (
-          table.slice(-14).map((card, idx) => (
-            <div key={card.id} className="card-wrapper" style={{ marginLeft: idx === 0 ? 0 : -28, boxShadow: '0 4px 8px rgba(0,0,0,0.08)' }}>
+          table.slice(-5).map((card, idx) => (
+            <div key={card.id} className="card-wrapper" style={{ boxShadow: '0 4px 8px rgba(0,0,0,0.08)' }}>
               <CardView card={card} skinConfig={skinConfig} />
             </div>
           ))
