@@ -20,16 +20,10 @@ const defaultPlayerStats: PlayerStats = {
 };
 
 const defaultGlobalStats: GlobalStats = {
-  playerCount: 1200,
-  averageScore: 18.4,
-  bestScore: 8,
-  leaderboard: [
-    { id: '1', playerName: 'Avery', score: 8, date: Date.now() - 3600 * 24 * 1000 },
-    { id: '2', playerName: 'Kai', score: 10, date: Date.now() - 3600 * 8 * 1000 },
-    { id: '3', playerName: 'Mila', score: 12, date: Date.now() - 3600 * 18 * 1000 },
-    { id: '4', playerName: 'Noah', score: 14, date: Date.now() - 3600 * 40 * 1000 },
-    { id: '5', playerName: 'Sam', score: 16, date: Date.now() - 3600 * 72 * 1000 },
-  ],
+  playerCount: 0,
+  averageScore: 0,
+  bestScore: 999,
+  leaderboard: [],
 };
 
 export function loadStats(): SavedStats {
@@ -78,31 +72,53 @@ export function recordGame(
     newStats.playerStats.rankedTotalScore += score;
   }
 
+  // Update global aggregates (count, average, best) but do NOT auto-add to leaderboard.
   newStats.globalStats.playerCount += 1;
   newStats.globalStats.averageScore =
-    (newStats.globalStats.averageScore * (newStats.globalStats.playerCount - 1) +
-      score) /
+    (newStats.globalStats.averageScore * (newStats.globalStats.playerCount - 1) + score) /
     newStats.globalStats.playerCount;
-  newStats.globalStats.bestScore = Math.min(
-    newStats.globalStats.bestScore,
-    score
-  );
+  newStats.globalStats.bestScore = Math.min(newStats.globalStats.bestScore, score);
 
+  // leaderboard entries are only added when the player explicitly saves their score.
+
+  saveStats(newStats);
+  return newStats;
+}
+
+export function addLeaderboardEntry(stats: SavedStats, playerName: string, score: number): SavedStats {
+  const newStats = { ...stats };
   const entry: LeaderboardEntry = {
     id: Math.random().toString(36).substr(2, 9),
-    playerName: newStats.playerName,
+    playerName,
     score,
     date: Date.now(),
   };
   newStats.globalStats.leaderboard.push(entry);
   newStats.globalStats.leaderboard.sort((a, b) => a.score - b.score);
-  if (newStats.globalStats.leaderboard.length > 10) {
-    newStats.globalStats.leaderboard = newStats.globalStats.leaderboard.slice(
-      0,
-      10
-    );
+  if (newStats.globalStats.leaderboard.length > 20) {
+    newStats.globalStats.leaderboard = newStats.globalStats.leaderboard.slice(0, 20);
   }
+  newStats.globalStats.bestScore = Math.min(newStats.globalStats.bestScore, score);
+  saveStats(newStats);
+  return newStats;
+}
 
+export function clearLeaderboardAndHistory(stats: SavedStats): SavedStats {
+  // Preserve playerName and selectedSkin, wipe leaderboard and aggregate history
+  const newStats: SavedStats = {
+    playerName: stats.playerName || 'Player',
+    selectedSkin: stats.selectedSkin || (CardSkin.Classic as CardSkin),
+    mode: stats.mode,
+    playerStats: {
+      gamesPlayed: 0,
+      gamesCompleted: 0,
+      totalScore: 0,
+      bestScore: 52,
+      rankedGames: 0,
+      rankedTotalScore: 0,
+    },
+    globalStats: { ...defaultGlobalStats },
+  };
   saveStats(newStats);
   return newStats;
 }

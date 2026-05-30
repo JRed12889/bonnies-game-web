@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createDeck, detectMatch, applyMatch, getDisplayName } from './utils/gameLogic'
-import { loadStats, saveStats, recordGame } from './utils/storage'
+import { loadStats, saveStats, recordGame, addLeaderboardEntry, clearLeaderboardAndHistory } from './utils/storage'
 import { soundPlayer } from './utils/sounds'
 import { getSkinConfig } from './utils/skins'
 import { Card, CardSkin, MatchType, GameMode } from './types'
@@ -12,10 +12,21 @@ function App() {
   const [message, setMessage] = useState('Tap Flip to begin.')
   const [finished, setFinished] = useState(false)
   const [pendingMatch, setPendingMatch] = useState<MatchType | null>(null)
+  const [showFinishModal, setShowFinishModal] = useState(false)
+  const [finalScore, setFinalScore] = useState<number | null>(null)
+  const [nameForSave, setNameForSave] = useState('')
+  const [qualifiesForBoard, setQualifiesForBoard] = useState(false)
 
   useEffect(() => {
     saveStats(stats)
   }, [stats])
+
+  // Clear historical leaderboard data now as requested (preserve player name/skin)
+  useEffect(() => {
+    const wiped = clearLeaderboardAndHistory(stats)
+    setStats(wiped)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const selectedSkin = stats.selectedSkin
   const skinConfig = getSkinConfig(selectedSkin as CardSkin)
@@ -65,9 +76,36 @@ function App() {
     if (pendingMatch) return
     if (deck.length > 0) return
     setFinished(true)
-    setMessage(`Game finished! Penalty score: ${finalTable.length}.`)
+    setFinalScore(finalTable.length)
+    setShowFinishModal(true)
+    setMessage('')
+    // update aggregates (games played/completed/avg) but do not add to leaderboard yet
     const updated = recordGame(stats, finalTable.length, stats.mode as GameMode)
     setStats(updated)
+    setNameForSave(updated.playerName)
+    // determine qualification for top-20
+    const lb = updated.globalStats.leaderboard
+    const qualifies = lb.length < 20 || finalTable.length < (lb[lb.length - 1]?.score ?? Infinity)
+    setQualifiesForBoard(qualifies)
+  }
+
+  function getScoreMessage(score: number) {
+    if (score >= 2 && score <= 10) return "Awesome — nice run!"
+    if (score >= 12 && score <= 18) return "Better luck next time."
+    if (score >= 20 && score <= 26) return "Oof — that was rough, but you'll get 'em next time."
+    if (score > 26) return "Maybe take a break — that one hurt."
+    return `Final score: ${score}`
+  }
+
+  function saveToLeaderboard() {
+    if (finalScore == null) return
+    const updated = addLeaderboardEntry(stats, nameForSave || 'Player', finalScore)
+    setStats(updated)
+    setShowFinishModal(false)
+  }
+
+  function closeFinishModal() {
+    setShowFinishModal(false)
   }
 
   function resetGame() {
@@ -133,6 +171,36 @@ function App() {
       <footer style={{ marginTop: 16 }}>
         <Leaderboard globalStats={stats.globalStats} />
       </footer>
+
+      {/* Finish modal */}
+      {showFinishModal && finalScore !== null && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}>
+          <div style={{ width: 320, background: '#fff', borderRadius: 12, padding: 16 }}>
+            <h2>Game Over</h2>
+            <div style={{ marginTop: 8 }}>
+              <div style={{ fontWeight: 700, fontSize: 20 }}>{`Score: ${finalScore}`}</div>
+              <div style={{ marginTop: 8, color: '#444' }}>{getScoreMessage(finalScore)}</div>
+            </div>
+            {qualifiesForBoard ? (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 13, color: '#222' }}>Congrats — your score may enter the top 20. Edit your name:</div>
+                <input value={nameForSave} onChange={e => setNameForSave(e.target.value)} style={{ marginTop: 8, width: '100%', padding: 8 }} />
+                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                  <button onClick={saveToLeaderboard} style={{ flex: 1, background: '#28a745', color: '#fff', padding: '8px 12px', borderRadius: 8 }}>Save</button>
+                  <button onClick={closeFinishModal} style={{ flex: 1, background: '#ccc', padding: '8px 12px', borderRadius: 8 }}>Close</button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ color: '#666' }}>Your score didn't make the top 20.</div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+                  <button onClick={closeFinishModal} style={{ background: '#007bff', color: '#fff', padding: '8px 12px', borderRadius: 8 }}>Close</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
