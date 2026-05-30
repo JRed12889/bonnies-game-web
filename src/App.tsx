@@ -293,12 +293,21 @@ function Stat({ title, value }: { title: string; value: string }) {
 function CardView({ card, skinConfig }: { card: Card; skinConfig: any }) {
   return (
     <div style={{ width: '100%', height: '100%', borderRadius: 20, background: skinConfig.faceBackground, border: `1px solid ${skinConfig.borderColor}`, display: 'flex', flexDirection: 'column' }}>
+      {/* Top corner: large rank with suit beneath (traditional card style) */}
       <div style={{ padding: '6% 8%', minHeight: '5%' }}>
-        <div style={{ fontWeight: 700, color: skinConfig.labelColor }}>{card.rank}</div>
+        <div style={{ fontWeight: 800, color: skinConfig.labelColor, fontSize: 32, lineHeight: 1 }}>{card.rank}</div>
+        <div style={{ fontSize: 16, color: skinConfig.suitColor(card.suit), marginTop: 4 }}>{card.suit}</div>
       </div>
+
+      {/* Center: suit symbol (kept prominent) */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 64, color: skinConfig.suitColor(card.suit), textShadow: `0 0 2px ${skinConfig.textShadow}` }}>{card.suit}</div>
+
+      {/* Bottom corner: mirrored rank + suit (rotated) */}
       <div style={{ padding: '6% 8%', minHeight: '5%', display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-        <div style={{ fontWeight: 700, color: skinConfig.labelColor }}>{card.rank}</div>
+        <div style={{ transform: 'rotate(180deg)', display: 'inline-block', textAlign: 'right' }}>
+          <div style={{ fontWeight: 800, color: skinConfig.labelColor, fontSize: 32, lineHeight: 1 }}>{card.rank}</div>
+          <div style={{ fontSize: 16, color: skinConfig.suitColor(card.suit), marginTop: 4 }}>{card.suit}</div>
+        </div>
       </div>
     </div>
   )
