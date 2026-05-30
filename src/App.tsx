@@ -21,6 +21,15 @@ function App() {
     saveStats(stats)
   }, [stats])
 
+  // Ensure the finish modal triggers whenever the deck reaches zero.
+  useEffect(() => {
+    if (!finished && deck.length === 0) {
+      // pass the current table as the final state
+      finishGameIfNeeded(table)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deck.length, table.length, finished])
+
   // Clear historical leaderboard data now as requested (preserve player name/skin)
   useEffect(() => {
     const wiped = clearLeaderboardAndHistory(stats)
