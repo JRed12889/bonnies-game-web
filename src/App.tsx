@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { createDeck, detectMatch, applyMatch, getDisplayName } from './utils/gameLogic'
+import { createDeck, detectMatch, cascadeRemove, getDisplayName } from './utils/gameLogic'
 import { loadStats, saveStats, recordGame } from './utils/storage'
 import { soundPlayer } from './utils/sounds'
 import { getSkinConfig } from './utils/skins'
@@ -30,7 +30,7 @@ function App() {
       const match = detectMatch(newTable)
       if (match) {
         setPendingMatch(match)
-        setMessage(match === MatchType.Rank ? 'Rank match available! Resolve to remove 4 cards.' : 'Suit match available! Resolve to remove the middle 2 cards.')
+        // do not show a special match notification text; pendingMatch alone indicates availability
       } else {
         setPendingMatch(null)
         setMessage(`Flipped ${getDisplayName(next)}. No match yet.`)
@@ -46,9 +46,9 @@ function App() {
     if (!pendingMatch) return
     setPendingMatch(null)
     setTable(t => {
-      const newTable = applyMatch(t, pendingMatch)
+      const { table: newTable } = cascadeRemove(t)
       soundPlayer.playMatch()
-      setMessage(pendingMatch === MatchType.Rank ? 'Rank match removed 4 cards.' : 'Suit match removed the middle 2 cards.')
+      // do not set a match-specific message
       if (deck.length === 0) finishGameIfNeeded(newTable)
       return newTable
     })
@@ -83,14 +83,14 @@ function App() {
         </div>
       </header>
 
-      <div style={{ display: 'flex', gap: 12, alignItems: 'center', overflowX: 'auto' }}>
+      <div className="card-row">
         {table.length === 0 ? (
           <div style={{ width: 150, height: 213, borderRadius: 22, background: `linear-gradient(135deg, ${skinConfig.backGradient[0]}, ${skinConfig.backGradient[1]})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <strong style={{ color: '#fff' }}>Deck</strong>
           </div>
         ) : (
           table.slice(-14).map((card, idx) => (
-            <div key={card.id} style={{ width: 138, height: 213, marginLeft: idx === 0 ? 0 : -28, boxShadow: '0 4px 8px rgba(0,0,0,0.08)' }}>
+            <div key={card.id} className="card-wrapper" style={{ marginLeft: idx === 0 ? 0 : -28, boxShadow: '0 4px 8px rgba(0,0,0,0.08)' }}>
               <CardView card={card} skinConfig={skinConfig} />
             </div>
           ))
@@ -115,7 +115,12 @@ function App() {
         <button onClick={resetGame} style={{ padding: '12px 16px', background: '#6f42c1', color: '#fff' }}>
           Restart
         </button>
-        <button onClick={resolvePendingMatch} disabled={!pendingMatch} style={{ flex: 1, padding: '12px 16px', background: pendingMatch ? '#28a745' : '#888', color: '#fff' }}>
+        <button
+          onClick={resolvePendingMatch}
+          disabled={!pendingMatch}
+          className={`button-match ${pendingMatch ? 'match-available' : ''}`}
+          style={{ flex: 1 }}
+        >
           Match
         </button>
       </div>

@@ -54,6 +54,23 @@ export function applyMatch(table: Card[], match: MatchType): Card[] {
   return newTable;
 }
 
+// Repeatedly detect and remove matches until no more are present.
+// Returns the final table and total removed count.
+export function cascadeRemove(table: Card[]): { table: Card[]; removedCount: number } {
+  let working = [...table];
+  let removedTotal = 0;
+
+  while (true) {
+    const match = detectMatch(working);
+    if (!match) break;
+    const before = working.length;
+    working = applyMatch(working, match);
+    removedTotal += before - working.length;
+  }
+
+  return { table: working, removedCount: removedTotal };
+}
+
 export function getDisplayName(card: Card): string {
   return `${card.rank}${card.suit}`;
 }

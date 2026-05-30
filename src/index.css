@@ -49,3 +49,33 @@ select, input[type="text"] {
 input[type="text"]::placeholder {
   color: #999;
 }
+
+/* Card row: horizontal scroll with no wrapping */
+.card-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fixed-size card wrapper */
+.card-wrapper {
+  flex: 0 0 auto;
+  width: 138px;
+  height: 213px;
+  box-sizing: border-box;
+}
+
+/* Match button colors: default subtle and stronger green when available */
+.button-match {
+  background: #8bca84;
+  color: #06260f;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+.button-match.match-available {
+  background: #5bb450;
+}
