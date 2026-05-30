@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createDeck, detectMatch, applyMatch, getDisplayName } from './utils/gameLogic'
-import { loadStats, saveStats, recordGame, addLeaderboardEntry, clearLeaderboardAndHistory } from './utils/storage'
+import { loadStats, saveStats, recordGame, addLeaderboardEntry } from './utils/storage'
 import { soundPlayer } from './utils/sounds'
 import { getSkinConfig } from './utils/skins'
 import { Card, CardSkin, MatchType, GameMode } from './types'
@@ -32,12 +32,8 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck.length, table.length, finished])
 
-  // Clear historical leaderboard data now as requested (preserve player name/skin)
-  useEffect(() => {
-    const wiped = clearLeaderboardAndHistory(stats)
-    setStats(wiped)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // NOTE: historical leaderboard wipe was previously applied here accidentally on every load.
+  // Removed automatic wipe so leaderboard persists across page reloads.
 
   const selectedSkin = stats.selectedSkin
   const skinConfig = getSkinConfig(selectedSkin as CardSkin)
