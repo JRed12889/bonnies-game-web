@@ -52,6 +52,7 @@ input[type="text"]::placeholder {
 
 :root {
   --card-gap: 8px;
+  --card-scale: 1.06;
 }
 
 /* Card row: show cards in a row (no horizontal scroll) */
@@ -67,12 +68,18 @@ input[type="text"]::placeholder {
 /* Card wrapper: make five cards naturally fit across the container */
 .card-wrapper {
   flex: 0 0 auto;
-  /* Fit 4 cards across, accounting for gaps */
-  width: calc((100% - (3 * var(--card-gap))) / 4);
+  /* Fit 4 cards across, accounting for gaps, allow scaling to make cards slightly bigger */
+  width: calc((100% - (3 * var(--card-gap))) / 4 * var(--card-scale));
   /* Use trading-card aspect ratio (width:height = 5:7) */
   aspect-ratio: 5 / 7;
   box-sizing: border-box;
   border-radius: 12px;
+  transition: transform 160ms ease;
+}
+
+/* Apply a slight overlap by translating cards left (except the first) */
+.card-wrapper + .card-wrapper {
+  transform: translateX(-8%);
 }
 
 /* Match button colors: default subtle and stronger green when available */

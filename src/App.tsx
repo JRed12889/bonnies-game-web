@@ -65,7 +65,11 @@ function App() {
         setPendingMatch(nextMatch)
       } else {
         setPendingMatch(null)
-        if (deck.length === 0) finishGameIfNeeded(newTable)
+      }
+      // If the deck is empty after this removal, finish the game (show modal) regardless
+      if (deck.length === 0) {
+        // use a microtask to ensure state updates settle
+        setTimeout(() => finishGameIfNeeded(newTable), 0)
       }
       return newTable
     })
