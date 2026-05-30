@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createDeck, detectMatch, applyMatch, getDisplayName } from './utils/gameLogic'
-import { loadStats, saveStats, recordGame, addLeaderboardEntry } from './utils/storage'
+import { loadStats, saveStats, recordGame, addLeaderboardEntry, clearLeaderboardAndHistory } from './utils/storage'
 import { soundPlayer } from './utils/sounds'
 import { getSkinConfig } from './utils/skins'
 import { Card, CardSkin, MatchType, GameMode } from './types'
@@ -18,6 +18,9 @@ function App() {
   const [qualifiesForBoard, setQualifiesForBoard] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showRules, setShowRules] = useState(false)
+  const [showWipeModal, setShowWipeModal] = useState(false)
+  const [wipePassword, setWipePassword] = useState('')
+  const [wipeError, setWipeError] = useState('')
 
   useEffect(() => {
     saveStats(stats)
@@ -118,6 +121,24 @@ function App() {
     setShowFinishModal(false)
   }
 
+  function openWipeModal() {
+    setWipePassword('')
+    setWipeError('')
+    setShowWipeModal(true)
+  }
+
+  function confirmWipe() {
+    // Password is 'Lafayette' (case-sensitive)
+    if (wipePassword === 'Lafayette') {
+      const wiped = clearLeaderboardAndHistory(stats)
+      setStats(wiped)
+      setShowWipeModal(false)
+      setWipeError('')
+    } else {
+      setWipeError('Incorrect password')
+    }
+  }
+
   function resetGame() {
     setDeck(createDeck())
     setTable([])
@@ -194,6 +215,9 @@ function App() {
 
       <footer style={{ marginTop: 16 }}>
         <Leaderboard globalStats={stats.globalStats} />
+        <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
+          <button onClick={openWipeModal} style={{ padding: '6px 10px', background: '#d9534f', color: '#fff', borderRadius: 8, fontSize: 13 }}>Wipe Leaderboard</button>
+        </div>
       </footer>
 
       {/* Finish modal */}
@@ -254,6 +278,22 @@ function App() {
             </ol>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
               <button onClick={closeRules} style={{ padding: '8px 12px', borderRadius: 8, background: '#007bff', color: '#fff' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Wipe leaderboard modal (password protected) */}
+      {showWipeModal && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 80 }}>
+          <div style={{ width: 360, background: '#fff', borderRadius: 12, padding: 16 }}>
+            <h3>Wipe Leaderboard</h3>
+            <div style={{ marginTop: 8, color: '#333' }}>Enter admin password to permanently clear leaderboard data.</div>
+            <input type="password" value={wipePassword} onChange={e => setWipePassword(e.target.value)} style={{ marginTop: 12, width: '100%', padding: 8 }} />
+            {wipeError && <div style={{ color: 'red', marginTop: 8 }}>{wipeError}</div>}
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button onClick={confirmWipe} style={{ flex: 1, background: '#d9534f', color: '#fff', padding: '8px 12px', borderRadius: 8 }}>Confirm</button>
+              <button onClick={() => setShowWipeModal(false)} style={{ flex: 1, background: '#ccc', padding: '8px 12px', borderRadius: 8 }}>Cancel</button>
             </div>
           </div>
         </div>
