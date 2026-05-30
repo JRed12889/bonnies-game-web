@@ -247,14 +247,14 @@ function App() {
       {/* Rules modal */}
       {showRules && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 70 }}>
-          <div style={{ width: 360, background: '#fff', borderRadius: 12, padding: 16 }}>
+          <div style={{ width: 'min(92vw, 560px)', background: '#fff', borderRadius: 12, padding: 20 }}>
             <h2>Rules</h2>
-            <ol style={{ marginTop: 8, color: '#333' }}>
-              <li>Press <strong>Flip</strong> to reveal the next card onto the table.</li>
-              <li>If the newly flipped card matches the <em>rank</em> of the card 4 places back, it's a Rank match — press <strong>Match</strong> to remove those 4 cards.</li>
-              <li>If the newly flipped card matches the <em>suit</em> of the card 4 places back, it's a Suit match — press <strong>Match</strong> to remove the two middle cards of that 4-card block.</li>
-              <li>When the deck is exhausted, your final score equals the number of cards remaining on the table (lower is better).</li>
-              <li>If your score qualifies for the top 20, you can edit your name and save it to the leaderboard.</li>
+            <ol style={{ marginTop: 8, color: '#333', paddingLeft: 18, listStylePosition: 'inside', lineHeight: 1.5 }}>
+              <li style={{ marginBottom: 8 }}>Press <strong>Flip</strong> to reveal the next card onto the table.</li>
+              <li style={{ marginBottom: 8 }}>If the newly flipped card matches the <em>rank</em> of the card 4 places back, it's a Rank match — press <strong>Match</strong> to remove those 4 cards.</li>
+              <li style={{ marginBottom: 8 }}>If the newly flipped card matches the <em>suit</em> of the card 4 places back, it's a Suit match — press <strong>Match</strong> to remove the two middle cards of that 4-card block.</li>
+              <li style={{ marginBottom: 8 }}>When the deck is exhausted, your final score equals the number of cards remaining on the table (lower is better).</li>
+              <li style={{ marginBottom: 8 }}>If your score qualifies for the top 20, you can edit your name and save it to the leaderboard.</li>
             </ol>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
               <button onClick={closeRules} style={{ padding: '8px 12px', borderRadius: 8, background: '#007bff', color: '#fff' }}>Close</button>
