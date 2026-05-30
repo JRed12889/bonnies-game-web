@@ -246,7 +246,7 @@ function App() {
             <h2>Rules</h2>
             <ol style={{ marginTop: 8, color: '#333', paddingLeft: 18, listStylePosition: 'inside', lineHeight: 1.5 }}>
               <li style={{ marginBottom: 8 }}>Press <strong>Flip</strong> to reveal the next card onto the table.</li>
-              <li style={{ marginBottom: 8 }}>If the newly flipped card matches the <em>rank</em> of the card 4 places back, it's a Rank match — press <strong>Match</strong> to remove those 4 cards.</li>
+              <li style={{ marginBottom: 8 }}>If the newly flipped card matches the <em>number</em> of the card 4 places back, it's a Number Match — press <strong>Match</strong> to remove those 4 cards.</li>
               <li style={{ marginBottom: 8 }}>If the newly flipped card matches the <em>suit</em> of the card 4 places back, it's a Suit match — press <strong>Match</strong> to remove the two middle cards of that 4-card block.</li>
               <li style={{ marginBottom: 8 }}>When the deck is exhausted, your final score equals the number of cards remaining on the table (lower is better).</li>
               <li style={{ marginBottom: 8 }}>If your score qualifies for the top 20, you can edit your name and save it to the leaderboard.</li>
