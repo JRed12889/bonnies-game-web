@@ -16,6 +16,8 @@ function App() {
   const [finalScore, setFinalScore] = useState<number | null>(null)
   const [nameForSave, setNameForSave] = useState('')
   const [qualifiesForBoard, setQualifiesForBoard] = useState(false)
+  const [showLanding, setShowLanding] = useState(true)
+  const [showRules, setShowRules] = useState(false)
 
   useEffect(() => {
     saveStats(stats)
@@ -129,6 +131,20 @@ function App() {
     soundPlayer.playShuffle()
   }
 
+  function startGame() {
+    setShowLanding(false)
+    setMessage('Tap Flip to begin.')
+    soundPlayer.playShuffle()
+  }
+
+  function openRules() {
+    setShowRules(true)
+  }
+
+  function closeRules() {
+    setShowRules(false)
+  }
+
   return (
     <div>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -155,7 +171,7 @@ function App() {
       <div style={{ marginTop: 12 }}>
         <h3 style={{ color: '#fff' }}>Game stats</h3>
         <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
-          <Stat title="Penalty" value={`${table.length}`} />
+          <Stat title="Score" value={`${table.length}`} />
           <Stat title="Remaining" value={`${deck.length}`} />
           <Stat title="Best" value={`${stats.playerStats.bestScore}`} />
         </div>
@@ -210,6 +226,39 @@ function App() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Landing screen before the first game */}
+      {showLanding && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(102,126,234,0.95), rgba(118,75,162,0.95))', zIndex: 60 }}>
+          <div style={{ width: 340, background: '#fff', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+            <h1>Bonnie's Game</h1>
+            <p style={{ color: '#444' }}>A simple Flip-4 style card game. Flip cards and remove matches.</p>
+            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+              <button onClick={startGame} style={{ flex: 1, padding: '10px 12px', background: '#28a745', color: '#fff', borderRadius: 8 }}>Start Game</button>
+              <button onClick={openRules} style={{ flex: 1, padding: '10px 12px', background: '#6c757d', color: '#fff', borderRadius: 8 }}>Rules</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rules modal */}
+      {showRules && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 70 }}>
+          <div style={{ width: 360, background: '#fff', borderRadius: 12, padding: 16 }}>
+            <h2>Rules</h2>
+            <ol style={{ marginTop: 8, color: '#333' }}>
+              <li>Press <strong>Flip</strong> to reveal the next card onto the table.</li>
+              <li>If the newly flipped card matches the <em>rank</em> of the card 4 places back, it's a Rank match — press <strong>Match</strong> to remove those 4 cards.</li>
+              <li>If the newly flipped card matches the <em>suit</em> of the card 4 places back, it's a Suit match — press <strong>Match</strong> to remove the two middle cards of that 4-card block.</li>
+              <li>When the deck is exhausted, your final score equals the number of cards remaining on the table (lower is better).</li>
+              <li>If your score qualifies for the top 20, you can edit your name and save it to the leaderboard.</li>
+            </ol>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+              <button onClick={closeRules} style={{ padding: '8px 12px', borderRadius: 8, background: '#007bff', color: '#fff' }}>Close</button>
+            </div>
           </div>
         </div>
       )}
