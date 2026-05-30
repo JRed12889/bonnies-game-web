@@ -18,6 +18,7 @@ function App() {
   const [qualifiesForBoard, setQualifiesForBoard] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showRules, setShowRules] = useState(false)
+  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
 
   useEffect(() => {
     saveStats(stats)
@@ -109,6 +110,14 @@ function App() {
 
   function closeFinishModal() {
     setShowFinishModal(false)
+  }
+
+  function openLeaderboardModal() {
+    setShowLeaderboardModal(true)
+  }
+
+  function closeLeaderboardModal() {
+    setShowLeaderboardModal(false)
   }
 
   function saveToLeaderboard() {
@@ -218,14 +227,26 @@ function App() {
                   </div>
                 </div>
               ) : (
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                  <button onClick={openLeaderboardModal} style={{ background: '#6c757d', color: '#fff', padding: '10px 16px', borderRadius: 8 }}>View Leaderboard</button>
                   <button onClick={closeFinishModal} style={{ background: '#007bff', color: '#fff', padding: '10px 16px', borderRadius: 8 }}>Close</button>
                 </div>
               )}
-              <div style={{ marginTop: 16 }}>
-                <h3 style={{ marginBottom: 8 }}>Leaderboard</h3>
-                <Leaderboard globalStats={stats.globalStats} />
-              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leaderboard modal (opens from finish modal) */}
+      {showLeaderboardModal && (
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', zIndex: 80 }}>
+          <div style={{ width: 'min(92vw, 540px)', background: '#fff', borderRadius: 12, padding: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3>Leaderboard</h3>
+              <button onClick={closeLeaderboardModal} style={{ padding: '6px 10px', background: '#ccc', borderRadius: 8 }}>Close</button>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <Leaderboard globalStats={stats.globalStats} />
             </div>
           </div>
         </div>
