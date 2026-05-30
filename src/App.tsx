@@ -73,7 +73,6 @@ function App() {
 
   function finishGameIfNeeded(finalTable: Card[]) {
     if (finished) return
-    if (pendingMatch) return
     if (deck.length > 0) return
     setFinished(true)
     setFinalScore(finalTable.length)
