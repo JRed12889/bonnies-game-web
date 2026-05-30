@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createDeck, detectMatch, applyMatch, getDisplayName } from './utils/gameLogic'
-import { loadStats, saveStats, recordGame, addLeaderboardEntry, clearLeaderboardAndHistory } from './utils/storage'
+import { loadStats, saveStats, recordGame, addLeaderboardEntry } from './utils/storage'
 import { soundPlayer } from './utils/sounds'
 import { getSkinConfig } from './utils/skins'
 import { Card, CardSkin, MatchType, GameMode } from './types'
@@ -18,9 +18,6 @@ function App() {
   const [qualifiesForBoard, setQualifiesForBoard] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showRules, setShowRules] = useState(false)
-  const [showWipeModal, setShowWipeModal] = useState(false)
-  const [wipePassword, setWipePassword] = useState('')
-  const [wipeError, setWipeError] = useState('')
 
   useEffect(() => {
     saveStats(stats)
@@ -110,34 +107,18 @@ function App() {
     return `Final score: ${score}`
   }
 
-  function saveToLeaderboard() {
-    if (finalScore == null) return
-    const updated = addLeaderboardEntry(stats, nameForSave || 'Player', finalScore)
-    setStats(updated)
-    setShowFinishModal(false)
-  }
-
   function closeFinishModal() {
     setShowFinishModal(false)
   }
 
-  function openWipeModal() {
-    setWipePassword('')
-    setWipeError('')
-    setShowWipeModal(true)
+  function saveToLeaderboard() {
+    if (finalScore == null) return
+    const updated = addLeaderboardEntry(stats, nameForSave || 'Player', finalScore)
+    setStats(updated)
+    setQualifiesForBoard(false)
   }
 
-  function confirmWipe() {
-    // Password is 'Lafayette' (case-sensitive)
-    if (wipePassword === 'Lafayette') {
-      const wiped = clearLeaderboardAndHistory(stats)
-      setStats(wiped)
-      setShowWipeModal(false)
-      setWipeError('')
-    } else {
-      setWipeError('Incorrect password')
-    }
-  }
+  // removed admin wipe UI as leaderboard is dropped
 
   function resetGame() {
     setDeck(createDeck())
@@ -214,38 +195,38 @@ function App() {
       </div>
 
       <footer style={{ marginTop: 16 }}>
-        <Leaderboard globalStats={stats.globalStats} />
-        <div style={{ marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
-          <button onClick={openWipeModal} style={{ padding: '6px 10px', background: '#d9534f', color: '#fff', borderRadius: 8, fontSize: 13 }}>Wipe Leaderboard</button>
-        </div>
+        {/* Leaderboard removed */}
       </footer>
 
       {/* Finish modal */}
       {showFinishModal && finalScore !== null && (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}>
-          <div style={{ width: 320, background: '#fff', borderRadius: 12, padding: 16 }}>
+        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 60 }}>
+          <div style={{ width: 360, background: '#fff', borderRadius: 12, padding: 20 }}>
             <h2>Game Over</h2>
             <div style={{ marginTop: 8 }}>
               <div style={{ fontWeight: 700, fontSize: 20 }}>{`Score: ${finalScore}`}</div>
               <div style={{ marginTop: 8, color: '#444' }}>{getScoreMessage(finalScore)}</div>
             </div>
-            {qualifiesForBoard ? (
-              <div style={{ marginTop: 12 }}>
-                <div style={{ fontSize: 13, color: '#222' }}>Congrats — your score may enter the top 20. Edit your name:</div>
-                <input value={nameForSave} onChange={e => setNameForSave(e.target.value)} style={{ marginTop: 8, width: '100%', padding: 8 }} />
-                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                  <button onClick={saveToLeaderboard} style={{ flex: 1, background: '#28a745', color: '#fff', padding: '8px 12px', borderRadius: 8 }}>Save</button>
-                  <button onClick={closeFinishModal} style={{ flex: 1, background: '#ccc', padding: '8px 12px', borderRadius: 8 }}>Close</button>
+            <div style={{ marginTop: 12 }}>
+              {qualifiesForBoard ? (
+                <div>
+                  <div style={{ fontSize: 13, color: '#222' }}>Congrats — your score may enter the top 20. Edit your name:</div>
+                  <input value={nameForSave} onChange={e => setNameForSave(e.target.value)} style={{ marginTop: 8, width: '100%', padding: 8 }} />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                    <button onClick={saveToLeaderboard} style={{ flex: 1, background: '#28a745', color: '#fff', padding: '8px 12px', borderRadius: 8 }}>Save</button>
+                    <button onClick={closeFinishModal} style={{ flex: 1, background: '#ccc', padding: '8px 12px', borderRadius: 8 }}>Close</button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div style={{ marginTop: 12 }}>
-                <div style={{ color: '#666' }}>Your score didn't make the top 20.</div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-                  <button onClick={closeFinishModal} style={{ background: '#007bff', color: '#fff', padding: '8px 12px', borderRadius: 8 }}>Close</button>
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button onClick={closeFinishModal} style={{ background: '#007bff', color: '#fff', padding: '10px 16px', borderRadius: 8 }}>Close</button>
                 </div>
+              )}
+              <div style={{ marginTop: 16 }}>
+                <h3 style={{ marginBottom: 8 }}>Leaderboard</h3>
+                <Leaderboard globalStats={stats.globalStats} />
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
