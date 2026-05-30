@@ -67,9 +67,12 @@ input[type="text"]::placeholder {
 /* Card wrapper: make five cards naturally fit across the container */
 .card-wrapper {
   flex: 0 0 auto;
-  width: calc((100% - (4 * var(--card-gap))) / 5);
-  height: 213px;
+  /* Fit 4 cards across, accounting for gaps */
+  width: calc((100% - (3 * var(--card-gap))) / 4);
+  /* Use trading-card aspect ratio (width:height = 5:7) */
+  aspect-ratio: 5 / 7;
   box-sizing: border-box;
+  border-radius: 12px;
 }
 
 /* Match button colors: default subtle and stronger green when available */
