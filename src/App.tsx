@@ -18,7 +18,7 @@ function App() {
   const [qualifiesForBoard, setQualifiesForBoard] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showRules, setShowRules] = useState(false)
-  const [showLeaderboardModal, setShowLeaderboardModal] = useState(false)
+  // leaderboard modal removed; leaderboard will be shown in finish modal
 
   useEffect(() => {
     saveStats(stats)
@@ -112,13 +112,6 @@ function App() {
     setShowFinishModal(false)
   }
 
-  function openLeaderboardModal() {
-    setShowLeaderboardModal(true)
-  }
-
-  function closeLeaderboardModal() {
-    setShowLeaderboardModal(false)
-  }
 
   function saveToLeaderboard() {
     if (finalScore == null) return
@@ -186,71 +179,51 @@ function App() {
 
       <p style={{ color: '#fff', marginTop: 12 }}>{message}</p>
 
-      <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-        <button onClick={flipNextCard} disabled={deck.length === 0 || finished} style={{ flex: 1, padding: '12px 16px', background: deck.length === 0 || finished ? '#888' : '#007bff', color: '#fff' }}>
-          Flip
-        </button>
-        <button onClick={resetGame} style={{ padding: '12px 16px', background: '#6f42c1', color: '#fff' }}>
-          Restart
-        </button>
-        <button
-          onClick={resolvePendingMatch}
-          disabled={!pendingMatch}
-          className={`button-match ${pendingMatch ? 'match-available' : ''}`}
-          style={{ flex: 1 }}
-        >
-          Match
-        </button>
-      </div>
+      {/* Actions moved to fixed bottom bar for mobile-friendly layout */}
 
       <footer style={{ marginTop: 16 }}>
         {/* Leaderboard removed */}
       </footer>
 
-      {/* Finish modal */}
+      {/* Finish modal (includes leaderboard) */}
       {showFinishModal && finalScore !== null && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 60 }}>
-          <div style={{ width: 360, background: '#fff', borderRadius: 12, padding: 20 }}>
+          <div style={{ width: 'min(92vw,540px)', background: '#fff', borderRadius: 12, padding: 20, maxHeight: '90vh', overflow: 'auto' }}>
             <h2>Game Over</h2>
             <div style={{ marginTop: 8 }}>
               <div style={{ fontWeight: 700, fontSize: 20 }}>{`Score: ${finalScore}`}</div>
               <div style={{ marginTop: 8, color: '#444' }}>{getScoreMessage(finalScore)}</div>
             </div>
+
             <div style={{ marginTop: 12 }}>
               {qualifiesForBoard ? (
                 <div>
                   <div style={{ fontSize: 13, color: '#222' }}>Congrats — your score may enter the top 20. Edit your name:</div>
                   <input value={nameForSave} onChange={e => setNameForSave(e.target.value)} style={{ marginTop: 8, width: '100%', padding: 8 }} />
                   <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                    <button onClick={saveToLeaderboard} style={{ flex: 1, background: '#28a745', color: '#fff', padding: '8px 12px', borderRadius: 8 }}>Save</button>
-                    <button onClick={closeFinishModal} style={{ flex: 1, background: '#ccc', padding: '8px 12px', borderRadius: 8 }}>Close</button>
+                    <button onClick={saveToLeaderboard} style={{ flex: 1, background: '#28a745', color: '#fff', padding: '12px 16px', borderRadius: 8 }}>Save</button>
+                    <button onClick={closeFinishModal} style={{ flex: 1, background: '#ccc', padding: '12px 16px', borderRadius: 8 }}>Close</button>
                   </div>
                 </div>
               ) : (
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                  <button onClick={openLeaderboardModal} style={{ background: '#6c757d', color: '#fff', padding: '10px 16px', borderRadius: 8 }}>View Leaderboard</button>
-                  <button onClick={closeFinishModal} style={{ background: '#007bff', color: '#fff', padding: '10px 16px', borderRadius: 8 }}>Close</button>
+                  <button onClick={closeFinishModal} style={{ background: '#007bff', color: '#fff', padding: '12px 16px', borderRadius: 8 }}>Close</button>
                 </div>
               )}
+            </div>
+
+            {/* Leaderboard area: show inside finish modal with scrollable container sized to show ~10 entries but allow scroll to top 20 */}
+            <div style={{ marginTop: 16 }}>
+              <div style={{ fontSize: 13, color: '#222', marginBottom: 8 }}>Leaderboard (Top 20)</div>
+              <div style={{ maxHeight: 380, overflowY: 'auto', background: '#f7fafc', padding: 8, borderRadius: 8 }}>
+                <Leaderboard globalStats={stats.globalStats} />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Leaderboard modal (opens from finish modal) */}
-      {showLeaderboardModal && (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.5)', zIndex: 80 }}>
-          <div style={{ width: 'min(92vw, 540px)', background: '#fff', borderRadius: 12, padding: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3>Leaderboard</h3>
-              <button onClick={closeLeaderboardModal} style={{ padding: '6px 10px', background: '#ccc', borderRadius: 8 }}>Close</button>
-            </div>
-            <div style={{ marginTop: 12 }}>
-              <Leaderboard globalStats={stats.globalStats} />
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Separate leaderboard modal removed; leaderboard is shown inside the finish modal. */}
 
       {/* Landing screen before the first game */}
       {showLanding && (
@@ -285,21 +258,25 @@ function App() {
         </div>
       )}
 
-      {/* Wipe leaderboard modal (password protected) */}
-      {showWipeModal && (
-        <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)', zIndex: 80 }}>
-          <div style={{ width: 360, background: '#fff', borderRadius: 12, padding: 16 }}>
-            <h3>Wipe Leaderboard</h3>
-            <div style={{ marginTop: 8, color: '#333' }}>Enter admin password to permanently clear leaderboard data.</div>
-            <input type="password" value={wipePassword} onChange={e => setWipePassword(e.target.value)} style={{ marginTop: 12, width: '100%', padding: 8 }} />
-            {wipeError && <div style={{ color: 'red', marginTop: 8 }}>{wipeError}</div>}
-            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-              <button onClick={confirmWipe} style={{ flex: 1, background: '#d9534f', color: '#fff', padding: '8px 12px', borderRadius: 8 }}>Confirm</button>
-              <button onClick={() => setShowWipeModal(false)} style={{ flex: 1, background: '#ccc', padding: '8px 12px', borderRadius: 8 }}>Cancel</button>
-            </div>
+      {/* Wipe modal removed (not used) */}
+
+      {/* Fixed bottom action bar */}
+      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 12, display: 'flex', justifyContent: 'center', zIndex: 40 }}>
+        <div style={{ width: '100%', maxWidth: 560, padding: '0 16px' }}>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button onClick={flipNextCard} disabled={deck.length === 0 || finished} style={{ flex: 1, padding: '36px 16px', background: deck.length === 0 || finished ? '#888' : '#007bff', color: '#fff', borderRadius: 12 }}>Flip</button>
+            <button onClick={resetGame} style={{ padding: '36px 16px', background: '#6f42c1', color: '#fff', borderRadius: 12 }}>Restart</button>
+            <button
+              onClick={resolvePendingMatch}
+              disabled={!pendingMatch}
+              className={`button-match ${pendingMatch ? 'match-available' : ''}`}
+              style={{ flex: 1, padding: '36px 16px', borderRadius: 12 }}
+            >
+              Match
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

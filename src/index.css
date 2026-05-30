@@ -71,8 +71,8 @@ input[type="text"]::placeholder {
   flex: 0 0 auto;
   /* Compute width so 4 cards fit while allowing overlap: add overlap back into available width */
   width: calc((100% + (3 * var(--card-overlap)) - (3 * var(--card-gap))) / 4 * var(--card-scale));
-  /* Use trading-card aspect ratio (width:height = 5:7) */
-  aspect-ratio: 5 / 7;
+  /* Use trading-card aspect ratio (width:height = 5:7). Increased height by 15% for a taller card. */
+  aspect-ratio: 5 / 8.05;
   box-sizing: border-box;
   border-radius: 12px;
 }
