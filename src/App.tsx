@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { createDeck, detectMatch, cascadeRemove, getDisplayName } from './utils/gameLogic'
+import { createDeck, detectMatch, applyMatch, getDisplayName } from './utils/gameLogic'
 import { loadStats, saveStats, recordGame } from './utils/storage'
 import { soundPlayer } from './utils/sounds'
 import { getSkinConfig } from './utils/skins'
@@ -44,12 +44,18 @@ function App() {
 
   function resolvePendingMatch() {
     if (!pendingMatch) return
-    setPendingMatch(null)
+    // remove only the current pending match; if a new match appears the user must press Match again
     setTable(t => {
-      const { table: newTable } = cascadeRemove(t)
+      const newTable = applyMatch(t, pendingMatch)
       soundPlayer.playMatch()
-      // do not set a match-specific message
-      if (deck.length === 0) finishGameIfNeeded(newTable)
+      // after removal, detect if a new match exists and set pendingMatch accordingly
+      const nextMatch = detectMatch(newTable)
+      if (nextMatch) {
+        setPendingMatch(nextMatch)
+      } else {
+        setPendingMatch(null)
+        if (deck.length === 0) finishGameIfNeeded(newTable)
+      }
       return newTable
     })
   }
@@ -88,7 +94,7 @@ function App() {
             <strong style={{ color: '#fff' }}>Deck</strong>
           </div>
         ) : (
-          table.slice(-5).map((card, idx) => (
+          table.slice(-4).map((card, idx) => (
             <div key={card.id} className="card-wrapper" style={{ boxShadow: '0 4px 8px rgba(0,0,0,0.08)' }}>
               <CardView card={card} skinConfig={skinConfig} />
             </div>
