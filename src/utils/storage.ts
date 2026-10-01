@@ -1,4 +1,5 @@
-import { PlayerStats, GlobalStats, LeaderboardEntry, CardSkin, GameMode } from '../types';
+import { PlayerStats, GlobalStats, LeaderboardEntry, CardSkin, GameMode, StoryProgress } from '../types';
+import { createInitialStoryProgress } from './storyMode';
 
 const STORAGE_KEY = 'bonnies_game_stats';
 
@@ -8,6 +9,7 @@ export interface SavedStats {
   mode: GameMode;
   playerStats: PlayerStats;
   globalStats: GlobalStats;
+  storyProgress: StoryProgress;
 }
 
 const defaultPlayerStats: PlayerStats = {
@@ -30,7 +32,19 @@ export function loadStats(): SavedStats {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored) as Partial<SavedStats>;
+      return {
+        playerName: parsed.playerName ?? 'Player',
+        selectedSkin: parsed.selectedSkin ?? CardSkin.Classic,
+        mode: parsed.mode ?? GameMode.Casual,
+        playerStats: { ...defaultPlayerStats, ...parsed.playerStats },
+        globalStats: {
+          ...defaultGlobalStats,
+          ...parsed.globalStats,
+          leaderboard: parsed.globalStats?.leaderboard ?? [],
+        },
+        storyProgress: { ...createInitialStoryProgress(), ...parsed.storyProgress },
+      };
     }
   } catch (error) {
     console.error('Failed to load stats:', error);
@@ -42,6 +56,7 @@ export function loadStats(): SavedStats {
     mode: GameMode.Casual,
     playerStats: { ...defaultPlayerStats },
     globalStats: { ...defaultGlobalStats },
+    storyProgress: createInitialStoryProgress(),
   };
 }
 
@@ -118,6 +133,7 @@ export function clearLeaderboardAndHistory(stats: SavedStats): SavedStats {
       rankedTotalScore: 0,
     },
     globalStats: { ...defaultGlobalStats },
+    storyProgress: createInitialStoryProgress(),
   };
   saveStats(newStats);
   return newStats;

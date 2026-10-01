@@ -39,6 +39,12 @@ export enum CardSkin {
   Pastel = 'pastel',
 }
 
+export interface StoryProgress {
+  level: number;
+  winsInLevel: number;
+  completed: boolean;
+}
+
 export enum MatchType {
   Rank = 'rank',
   Suit = 'suit',

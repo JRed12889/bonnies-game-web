@@ -68,6 +68,78 @@ button {
   color: #111;
 }
 
+.story-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-left: 3px solid #f6d365;
+  background: rgba(20, 25, 48, 0.24);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 300;
+}
+
+.story-banner strong {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.story-result {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 8px;
+  line-height: 1.45;
+}
+
+.story-result strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.story-result-success {
+  background: #e6f4e5;
+  color: #174d20;
+}
+
+.story-result-failure {
+  background: #fff0e8;
+  color: #74331c;
+}
+
+.story-preview {
+  margin-top: 14px;
+  color: #4c5966;
+  font-size: 14px;
+}
+
+.landing-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.landing-actions button {
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.landing-actions button:last-child {
+  grid-column: 1 / -1;
+}
+
+.story-reset {
+  margin-top: 12px;
+  padding: 8px 10px;
+  background: transparent;
+  color: #596673;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
 button:active {
   transform: scale(0.98);
 }

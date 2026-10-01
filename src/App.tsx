@@ -4,6 +4,7 @@ import { loadStats, saveStats, recordGame, addLeaderboardEntry } from './utils/s
 import { soundPlayer } from './utils/sounds'
 import { getSkinConfig } from './utils/skins'
 import { Card, CardSkin, MatchType, GameMode } from './types'
+import { advanceStoryProgress, getStoryChallenge, StoryOutcome } from './utils/storyMode'
 
 function App() {
   const [stats, setStats] = useState(loadStats())
@@ -18,6 +19,8 @@ function App() {
   const [qualifiesForBoard, setQualifiesForBoard] = useState(false)
   const [showLanding, setShowLanding] = useState(true)
   const [showRules, setShowRules] = useState(false)
+  const [playMode, setPlayMode] = useState<'free' | 'story'>('free')
+  const [storyOutcome, setStoryOutcome] = useState<StoryOutcome | null>(null)
   // leaderboard modal removed; leaderboard will be shown in finish modal
 
   useEffect(() => {
@@ -38,6 +41,7 @@ function App() {
 
   const selectedSkin = stats.selectedSkin
   const skinConfig = getSkinConfig(selectedSkin as CardSkin)
+  const storyChallenge = getStoryChallenge(stats.storyProgress)
 
   function flipNextCard() {
     if (finished || deck.length === 0) return
@@ -91,7 +95,12 @@ function App() {
     setShowFinishModal(true)
     setMessage('')
     // update aggregates (games played/completed/avg) but do not add to leaderboard yet
-    const updated = recordGame(stats, finalTable.length, stats.mode as GameMode)
+    let updated = recordGame(stats, finalTable.length, stats.mode as GameMode)
+    if (playMode === 'story') {
+      const outcome = advanceStoryProgress(stats.storyProgress, finalTable.length)
+      updated = { ...updated, storyProgress: outcome.progress }
+      setStoryOutcome(outcome)
+    }
     setStats(updated)
     setNameForSave(updated.playerName)
     // determine qualification for top-20
@@ -128,13 +137,31 @@ function App() {
     setMessage('Tap Flip to begin.')
     setFinished(false)
     setPendingMatch(null)
+    setStoryOutcome(null)
     soundPlayer.playShuffle()
   }
 
-  function startGame() {
+  function startGame(mode: 'free' | 'story') {
+    setPlayMode(mode)
+    setStoryOutcome(null)
     setShowLanding(false)
     setMessage('Tap Flip to begin.')
     soundPlayer.playShuffle()
+  }
+
+  function resetStoryProgress() {
+    if (!window.confirm('Reset all Story Mode progress and return to Level 1?')) return
+    setStats({
+      ...stats,
+      storyProgress: { level: 1, winsInLevel: 0, completed: false },
+    })
+    setDeck(createDeck())
+    setTable([])
+    setFinished(false)
+    setShowFinishModal(false)
+    setFinalScore(null)
+    setStoryOutcome(null)
+    setShowLanding(true)
   }
 
   function openRules() {
@@ -186,6 +213,21 @@ function App() {
         </div>
       </div>
 
+      {playMode === 'story' && (
+        <div className="story-banner">
+          <strong>Story Mode · Level {stats.storyProgress.level}</strong>
+          {stats.storyProgress.completed ? (
+            <span>Campaign complete</span>
+          ) : (
+            <span>
+              Score {storyChallenge.scoreLimit} or lower
+              {storyChallenge.winsRequired === 2 && ` · ${stats.storyProgress.winsInLevel}/2 consecutive wins`}
+            </span>
+          )}
+          <button className="story-reset" onClick={resetStoryProgress}>Reset Story</button>
+        </div>
+      )}
+
       <p style={{ color: '#fff', marginTop: 12 }}>{message}</p>
 
       {/* Actions moved to fixed bottom bar for mobile-friendly layout */}
@@ -203,6 +245,23 @@ function App() {
               <div style={{ fontWeight: 700, fontSize: 20 }}>{`Score: ${finalScore}`}</div>
               <div style={{ marginTop: 8, color: '#444' }}>{getScoreMessage(finalScore)}</div>
             </div>
+
+            {playMode === 'story' && storyOutcome && (
+              <div className={`story-result ${storyOutcome.passed || storyOutcome.alreadyComplete ? 'story-result-success' : 'story-result-failure'}`}>
+                <strong>{storyOutcome.alreadyComplete ? 'Story complete' : `Level ${storyOutcome.level}`}</strong>
+                <div>
+                  {storyOutcome.campaignCompleted
+                    ? 'You cleared every checkpoint. Bonnie’s story is complete!'
+                    : storyOutcome.alreadyComplete
+                      ? 'Your completed campaign is saved. Reset progress from the start screen to play again.'
+                      : storyOutcome.levelCompleted
+                        ? `Checkpoint cleared. Level ${storyOutcome.level + 1} is unlocked.`
+                        : storyOutcome.passed
+                          ? `Score target met. ${storyOutcome.winsRequired - stats.storyProgress.winsInLevel} more qualifying game${storyOutcome.winsRequired - stats.storyProgress.winsInLevel === 1 ? '' : 's'} in a row to clear this level.`
+                          : `You needed ${storyOutcome.scoreLimit} or lower. Your consecutive-win streak has reset.`}
+                </div>
+              </div>
+            )}
 
             <div style={{ marginTop: 12 }}>
               {qualifiesForBoard ? (
@@ -237,13 +296,22 @@ function App() {
       {/* Landing screen before the first game */}
       {showLanding && (
         <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(102,126,234,0.95), rgba(118,75,162,0.95))', zIndex: 60 }}>
-          <div style={{ width: 340, background: '#fff', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+          <div style={{ width: 'min(92vw,380px)', background: '#fff', borderRadius: 12, padding: 20, textAlign: 'center' }}>
             <h1>Bonnie's Game</h1>
-            <p style={{ color: '#444' }}>A simple Flip-4 style card game. Flip cards and remove matches.</p>
-            <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button onClick={startGame} style={{ flex: 1, padding: '12px 14px', background: '#28a745', color: '#fff', borderRadius: 8 }}>Start Game</button>
-              <button onClick={openRules} style={{ flex: 1, padding: '12px 14px', background: '#6c757d', color: '#fff', borderRadius: 8 }}>Rules</button>
+            <p style={{ color: '#444' }}>Flip cards, clear matches, and see how far you can go.</p>
+            <div className="story-preview">
+              {stats.storyProgress.completed
+                ? 'Story Mode complete'
+                : `Story Mode · Level ${storyChallenge.level} · score ${storyChallenge.scoreLimit} or lower${storyChallenge.winsRequired === 2 ? ' twice in a row' : ''}`}
             </div>
+            <div className="landing-actions">
+              <button onClick={() => startGame('free')} style={{ background: '#28a745', color: '#fff' }}>Free Play</button>
+              <button onClick={() => startGame('story')} style={{ background: '#007bff', color: '#fff' }}>Story Mode</button>
+              <button onClick={openRules} style={{ background: '#6c757d', color: '#fff' }}>Rules</button>
+            </div>
+            {(stats.storyProgress.level > 1 || stats.storyProgress.winsInLevel > 0 || stats.storyProgress.completed) && (
+              <button className="story-reset" onClick={resetStoryProgress}>Reset Story Progress</button>
+            )}
           </div>
         </div>
       )}
