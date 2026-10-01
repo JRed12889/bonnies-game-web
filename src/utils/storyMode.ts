@@ -4,6 +4,7 @@ export const STORY_LEVEL_COUNT = 24;
 
 export interface StoryOutcome {
   progress: StoryProgress;
+  level: number;
   scoreLimit: number;
   winsRequired: number;
   passed: boolean;
