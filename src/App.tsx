@@ -147,10 +147,19 @@ function App() {
 
   return (
     <div>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, position: 'sticky', top: 0, zIndex: 30 }}>
-        <h1 style={{ color: '#fff', fontWeight: 300, fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif', fontSize: 22, margin: 0 }}>Bonnie's Game</h1>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input value={stats.playerName} onChange={e => setStats({ ...stats, playerName: e.target.value })} style={{ width: 140, padding: '6px 8px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.06)', color: '#fff', fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif' }} />
+      <header className="app-header">
+        <h1 className="app-title">Bonnie's Game</h1>
+        <div className="header-controls">
+          <input aria-label="Player name" value={stats.playerName} onChange={e => setStats({ ...stats, playerName: e.target.value })} />
+          <select
+            aria-label="Card skin"
+            value={selectedSkin}
+            onChange={e => setStats({ ...stats, selectedSkin: e.target.value as CardSkin })}
+          >
+            {Object.values(CardSkin).map(skin => (
+              <option key={skin} value={skin}>{getSkinConfig(skin).displayName}</option>
+            ))}
+          </select>
         </div>
       </header>
 
@@ -201,13 +210,13 @@ function App() {
                   <div style={{ fontSize: 13, color: '#222' }}>Congrats — your score may enter the top 20. Edit your name:</div>
                   <input value={nameForSave} onChange={e => setNameForSave(e.target.value)} style={{ marginTop: 8, width: '100%', padding: 8 }} />
                   <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                    <button onClick={saveToLeaderboard} style={{ flex: 1, background: '#28a745', color: '#fff', padding: '12px 16px', borderRadius: 8, fontSize: '1.4rem' }}>Save</button>
-                    <button onClick={closeFinishModal} style={{ flex: 1, background: '#ccc', padding: '12px 16px', borderRadius: 8, fontSize: '1.4rem' }}>Close</button>
+                    <button onClick={saveToLeaderboard} style={{ flex: 1, background: '#28a745', color: '#fff', padding: '12px 16px', borderRadius: 8 }}>Save</button>
+                    <button onClick={closeFinishModal} style={{ flex: 1, background: '#ccc', padding: '12px 16px', borderRadius: 8 }}>Close</button>
                   </div>
                 </div>
               ) : (
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                  <button onClick={closeFinishModal} style={{ background: '#007bff', color: '#fff', padding: '12px 16px', borderRadius: 8, fontSize: '1.4rem' }}>Close</button>
+                  <button onClick={closeFinishModal} style={{ background: '#007bff', color: '#fff', padding: '12px 16px', borderRadius: 8 }}>Close</button>
                 </div>
               )}
             </div>
@@ -232,8 +241,8 @@ function App() {
             <h1>Bonnie's Game</h1>
             <p style={{ color: '#444' }}>A simple Flip-4 style card game. Flip cards and remove matches.</p>
             <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-              <button onClick={startGame} style={{ flex: 1, padding: '12px 14px', background: '#28a745', color: '#fff', borderRadius: 8, fontSize: '1.4rem' }}>Start Game</button>
-              <button onClick={openRules} style={{ flex: 1, padding: '12px 14px', background: '#6c757d', color: '#fff', borderRadius: 8, fontSize: '1.4rem' }}>Rules</button>
+              <button onClick={startGame} style={{ flex: 1, padding: '12px 14px', background: '#28a745', color: '#fff', borderRadius: 8 }}>Start Game</button>
+              <button onClick={openRules} style={{ flex: 1, padding: '12px 14px', background: '#6c757d', color: '#fff', borderRadius: 8 }}>Rules</button>
             </div>
           </div>
         </div>
@@ -252,7 +261,7 @@ function App() {
               <li style={{ marginBottom: 8 }}>If your score qualifies for the top 20, you can edit your name and save it to the leaderboard.</li>
             </ol>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-              <button onClick={closeRules} style={{ padding: '10px 14px', borderRadius: 8, background: '#007bff', color: '#fff', fontSize: '1.2rem' }}>Close</button>
+              <button onClick={closeRules} style={{ padding: '10px 14px', borderRadius: 8, background: '#007bff', color: '#fff' }}>Close</button>
             </div>
           </div>
         </div>
@@ -264,13 +273,13 @@ function App() {
       <div style={{ position: 'fixed', left: 0, right: 0, bottom: 12, display: 'flex', justifyContent: 'center', zIndex: 40 }}>
         <div style={{ width: '100%', maxWidth: 560, padding: '0 16px' }}>
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={flipNextCard} disabled={deck.length === 0 || finished} style={{ flex: 1, padding: '36px 16px', background: deck.length === 0 || finished ? '#888' : '#007bff', color: '#fff', borderRadius: 12, fontSize: '2rem' }}>Flip</button>
-            <button onClick={resetGame} style={{ padding: '36px 16px', background: '#6f42c1', color: '#fff', borderRadius: 12, fontSize: '2rem' }}>Restart</button>
+            <button onClick={flipNextCard} disabled={deck.length === 0 || finished} style={{ flex: 1, padding: '36px 16px', background: deck.length === 0 || finished ? '#888' : '#007bff', color: '#fff', borderRadius: 12 }}>Flip</button>
+            <button onClick={resetGame} style={{ padding: '36px 16px', background: '#6f42c1', color: '#fff', borderRadius: 12 }}>Restart</button>
             <button
               onClick={resolvePendingMatch}
               disabled={!pendingMatch}
               className={`button-match ${pendingMatch ? 'match-available' : ''}`}
-              style={{ flex: 1, padding: '36px 16px', borderRadius: 12, fontSize: '2rem' }}
+              style={{ flex: 1, padding: '36px 16px', borderRadius: 12 }}
             >
               Match
             </button>

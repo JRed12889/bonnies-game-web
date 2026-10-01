@@ -5,28 +5,67 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
 }
 
 #root {
   width: 100%;
   max-width: 500px;
-  padding: 16px;
+  padding: max(16px, env(safe-area-inset-top)) 16px 120px;
 }
 
 button {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  font-weight: 600;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
   transition: all 0.2s;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.app-title {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-controls input,
+.header-controls select {
+  min-width: 0;
+  max-width: 140px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font: 300 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.header-controls select option {
+  color: #111;
 }
 
 button:active {
@@ -91,4 +130,21 @@ input[type="text"]::placeholder {
 }
 .button-match.match-available {
   background: #5bb450;
+}
+
+@media (max-width: 380px) {
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-controls {
+    width: 100%;
+  }
+
+  .header-controls input,
+  .header-controls select {
+    flex: 1;
+    max-width: none;
+  }
 }
